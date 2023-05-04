@@ -45,7 +45,7 @@ function deleteJSON(...jsonFile) {
 }
 
 //sobrescreve um arquivo json
-function writeJSON(jsonFile, jsonContent, identSize = 2) {
+function overwriteJSON(jsonFile, jsonContent, identSize = 2) {
   const jsonFilePath = path.join(...jsonFile);
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     fs.writeFileSync(
@@ -85,7 +85,7 @@ function listJSON(...jsonPath) {
 module.exports = {
   readJSON,
   createJSON,
-  writeJSON,
+  overwriteJSON,
   deleteJSON,
   updateJSON,
   listJSON,
