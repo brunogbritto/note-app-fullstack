@@ -61,9 +61,12 @@ const Home = () => {
       <NotesList
         notes={notes.filter(
           (note) =>
-            note.content.toLowerCase().includes(searchText.toLowerCase()) ||
-            note.title.toLowerCase().includes(searchText.toLowerCase()) ||
-            note.subtitle.toLowerCase().includes(searchText.toLowerCase())
+            (note.content &&
+              note.content.toLowerCase().includes(searchText.toLowerCase())) ||
+            (note.title &&
+              note.title.toLowerCase().includes(searchText.toLowerCase())) ||
+            (note.subtitle &&
+              note.subtitle.toLowerCase().includes(searchText.toLowerCase()))
         )}
         handleAddNote={AddNote}
         handleDeleteNote={deleteNote}

@@ -1,27 +1,29 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-function isJSON(path) {
+function isJSON(path: string) {
   return path.endsWith(".json");
 }
 
-function fileExists(path) {
+function fileExists(path: string) {
   return fs.existsSync(path);
 }
 
 // lê um arquivo json
-function readJSON(...jsonFile) {
+export function readJSON(...jsonFile: string[]) {
   const jsonFilePath = path.join(...jsonFile);
 
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     return fs.readFileSync(jsonFilePath).toString();
-  } else {
-    throw new Error("Este arquivo JSON não existe.");
   }
 }
 
 //cria um arquivo json
-function createJSON(jsonFile, jsonContent, identSize = 2) {
+export function createJSON(
+  jsonFile: string[],
+  jsonContent: any,
+  identSize = 2
+) {
   const jsonFilePath = path.join(...jsonFile);
 
   if (!fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
@@ -35,7 +37,7 @@ function createJSON(jsonFile, jsonContent, identSize = 2) {
 }
 
 //apaga um arquivo json
-function deleteJSON(...jsonFile) {
+export function deleteJSON(...jsonFile: string[]) {
   const jsonFilePath = path.join(...jsonFile);
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     return fs.unlinkSync(jsonFilePath);
@@ -45,7 +47,11 @@ function deleteJSON(...jsonFile) {
 }
 
 //sobrescreve um arquivo json
-function overwriteJSON(jsonFile, jsonContent, identSize = 2) {
+export function overwriteJSON(
+  jsonFile: string[],
+  jsonContent: any,
+  identSize = 2
+) {
   const jsonFilePath = path.join(...jsonFile);
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     fs.writeFileSync(
@@ -58,7 +64,11 @@ function overwriteJSON(jsonFile, jsonContent, identSize = 2) {
 }
 
 //atualiza parcialmente um arquivo json
-function updateJSON(jsonFile, jsonContent, identSize = 2) {
+export function updateJSON(
+  jsonFile: string[],
+  jsonContent: any,
+  identSize = 2
+) {
   const jsonFilePath = path.join(...jsonFile);
 
   if (!fileExists(jsonFilePath) && isJSON(jsonFilePath))
@@ -77,16 +87,7 @@ function updateJSON(jsonFile, jsonContent, identSize = 2) {
   );
 }
 
-function listJSON(...jsonPath) {
+export function listJSON(...jsonPath: string[]) {
   const files = fs.readdirSync(path.join(...jsonPath));
   return files.filter((file) => file.endsWith(".json"));
 }
-
-module.exports = {
-  readJSON,
-  createJSON,
-  overwriteJSON,
-  deleteJSON,
-  updateJSON,
-  listJSON,
-};

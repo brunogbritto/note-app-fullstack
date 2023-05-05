@@ -1,0 +1,8 @@
+POST http://localhost:8080/comments
+Content-Type: application/json
+
+{
+    "notepad_id": 5,
+    "message": "UM NOVO COMENTÁRIO FOI ADICIONADO.",
+    "created_at": "28/04/2023"
+}
