@@ -32,7 +32,7 @@ const EditNote = () => {
       <Breadcrumbs
         links={[
           { title: "Página Inicial", link: "/" },
-          { title: note.title, link: `/publicacoes/${params.id}` },
+          { title: note.title, link: `/notepads/${params.id}` },
         ]}
       />
       <div className="bg-yellow-400 rounded-2xl p-4 mx-auto m-8 shadow-xl w-2/3 h-auto md:mx-auto md:max-w-screen-md">

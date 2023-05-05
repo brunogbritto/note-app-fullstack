@@ -14,8 +14,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/criar-note" element={<CreateNote />} />
-          <Route path="/publicacoes/:id" element={<ViewNote />} />
-          <Route path="/publicacoes/editar/:id" element={<EditNote />} />
+          <Route path="/notepads/:id" element={<ViewNote />} />
+          <Route path="/notepads/editar/:id" element={<EditNote />} />
         </Routes>
       </div>
     </BrowserRouter>

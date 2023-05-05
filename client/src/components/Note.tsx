@@ -20,7 +20,7 @@ const Note = ({
 }: NoteProps) => {
   return (
     <div className="bg-yellow-400 rounded-2xl p-4 max-h-full flex flex-col justify-between whitespace-pre-wrap placeholder-black">
-      <Link to={`/publicacoes/${id}`} key={id}>
+      <Link to={`/notepads/${id}`} key={id}>
         <div className="font-bold">
           <span>{title}</span>
         </div>

@@ -9,70 +9,75 @@ function fileExists(path: string) {
   return fs.existsSync(path);
 }
 
-// lê um arquivo json
+// Lê um arquivo JSON
 export function readJSON(...jsonFile: string[]) {
   const jsonFilePath = path.join(...jsonFile);
 
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
-    return fs.readFileSync(jsonFilePath).toString();
+    return JSON.parse(fs.readFileSync(jsonFilePath).toString());
+  } else {
+    throw new Error("Esse arquivo não existe!");
   }
 }
 
-//cria um arquivo json
+// Cria um arquivo JSON
 export function createJSON(
   jsonFile: string[],
   jsonContent: any,
-  identSize = 2
+  indentSize = 2
 ) {
   const jsonFilePath = path.join(...jsonFile);
 
   if (!fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     fs.writeFileSync(
       jsonFilePath,
-      JSON.stringify(jsonContent, null, identSize)
+      JSON.stringify(jsonContent, null, indentSize)
     );
   } else {
-    throw new Error("Este arquivo não existe.");
+    throw new Error("Já existe um arquivo nesse caminho!");
   }
 }
 
-//apaga um arquivo json
+// Apaga um arquivo JSON
 export function deleteJSON(...jsonFile: string[]) {
   const jsonFilePath = path.join(...jsonFile);
+
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     return fs.unlinkSync(jsonFilePath);
   } else {
-    throw new Error("Este não é um caminho para um arquivo JSON.");
+    throw new Error("Não é um caminho para um arquivo JSON");
   }
 }
 
-//sobrescreve um arquivo json
+// Sobrescreve um arquivo JSON
 export function overwriteJSON(
   jsonFile: string[],
   jsonContent: any,
-  identSize = 2
+  indentSize = 2
 ) {
   const jsonFilePath = path.join(...jsonFile);
+
   if (fileExists(jsonFilePath) && isJSON(jsonFilePath)) {
     fs.writeFileSync(
       jsonFilePath,
-      JSON.stringify(jsonContent, null, identSize)
+      JSON.stringify(jsonContent, null, indentSize)
     );
   } else {
-    throw new Error("Este arquivo não existe.");
+    throw new Error("Esse arquivo não existe!");
   }
 }
 
-//atualiza parcialmente um arquivo json
+// Atualiza parcialmente um arquivo JSON
 export function updateJSON(
   jsonFile: string[],
   jsonContent: any,
-  identSize = 2
+  indentSize = 2
 ) {
   const jsonFilePath = path.join(...jsonFile);
 
-  if (!fileExists(jsonFilePath) && isJSON(jsonFilePath))
-    throw new Error("Este arquivo não existe.");
+  if (!fileExists(jsonFilePath) || !isJSON(jsonFilePath)) {
+    throw new Error("Esse arquivo não existe!");
+  }
 
   const currentJsonContent = JSON.parse(
     fs.readFileSync(jsonFilePath).toString()
@@ -83,7 +88,7 @@ export function updateJSON(
   };
   fs.writeFileSync(
     jsonFilePath,
-    JSON.stringify(nextJsonContent, null, identSize)
+    JSON.stringify(nextJsonContent, null, indentSize)
   );
 }
 
