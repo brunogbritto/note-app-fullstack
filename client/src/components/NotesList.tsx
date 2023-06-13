@@ -1,23 +1,26 @@
 import { Note } from "./Note";
 import AddNote from "./AddNote";
 
-export type Notepad = {
-  notes: {
-    id: string;
-    title: string;
-    subtitle: string;
-    content: string;
-    created_at: string;
-  }[];
+export interface NoteData {
+  id: string;
+  title: string;
+  subtitle: string;
+  content: string;
+  created_at: string;
+  count: number;
+}
+
+export interface NotesListProps {
+  notes: NoteData[];
   handleAddNote: (noteText: string) => void;
-  handleDeleteNote: (noteText: string) => void;
-};
+  handleDeleteNote: (id: string) => void;
+}
 
-export type NotesListProps = {
-  notepads: Notepad[];
-};
-
-const NotesList = ({ notes, handleAddNote, handleDeleteNote }: Notepad) => {
+const NotesList = ({
+  notes,
+  handleAddNote,
+  handleDeleteNote,
+}: NotesListProps) => {
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
       {notes.map((note) => (
@@ -27,7 +30,7 @@ const NotesList = ({ notes, handleAddNote, handleDeleteNote }: Notepad) => {
           title={note.title}
           subtitle={note.subtitle}
           content={note.content}
-          createdAt={note.created_at}
+          created_at={note.created_at}
           handleDeleteNote={handleDeleteNote}
         />
       ))}

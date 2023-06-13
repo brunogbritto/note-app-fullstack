@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { LinkButton } from "../components/LinkButton";
-import { api } from "../api";
+import { api } from "../api/api";
 import toast from "react-simple-toasts";
 
 const ViewNote = () => {

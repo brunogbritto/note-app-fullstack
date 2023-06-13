@@ -1,70 +1,118 @@
 import path from "path";
 import * as json from "../json";
-import type { Notepad } from "./notepadTypes";
+import type { Notepad } from "../../../shared/types";
+import { getPool, sql } from "../database";
+import { createNotepadSchema } from "./schemas/createNotepad.schema";
+
+type FindNotepadsParams = {
+  limit?: number;
+  offset?: number;
+  order_by?: string;
+  direction?: string;
+};
 
 const notepadModelPath = path.join("src", "notepad", "notepadModel");
 const notepadModelDataPath = path.join(notepadModelPath, "data");
 
-export function findNotepadById(id: number) {
-  const notepad = json.readJSON(notepadModelDataPath, `${id}.json`);
-  return notepad;
+export async function findNotepadById(id: number) {
+  const pool = await getPool();
+  try {
+    const notepad: Notepad = await pool.one(sql`
+    select * from notepads
+    where id = ${id}`);
+    return notepad;
+  } catch {
+    return null;
+  }
 }
 
-export function findNotepads() {
-  const notepadsFiles = json.listJSON(notepadModelDataPath);
-  const notepads = notepadsFiles.map((file) =>
-    json.readJSON(notepadModelDataPath, file)
-  );
-  return notepads;
+export async function findNotepadCommentsById(
+  notepadId: number
+): Promise<Comment[]> {
+  const pool = await getPool();
+  const comments = (await pool.many(sql`
+    SELECT * from comments
+    WHERE notepad_id = ${notepadId}
+    ORDER BY created_at desc
+  `)) as any;
+  return comments;
 }
 
-export function deleteNotepadById(id: number) {
-  const notepad = json.readJSON(notepadModelDataPath, `${id}.json`);
-  json.deleteJSON(notepadModelDataPath, `${id}.json`);
-  const response = {
+export async function findNotepads({
+  limit = 10,
+  offset = 0,
+  order_by = "created_at",
+  direction = "desc",
+}: FindNotepadsParams = {}) {
+  const pool = await getPool();
+  const notepads = await pool.many(sql`
+    SELECT * from notepads
+    LIMIT ${limit} offset ${offset}
+    
+  
+  `);
+  return {
+    count: 0,
+    notepads,
+  };
+}
+
+export async function deleteNotepadById(id: number) {
+  const pool = await getPool();
+  const notepad = await findNotepadById(id);
+  const results = await pool.query(sql`
+  delete from notepads where id = ${id}`);
+
+  const success = results.rowCount === 1;
+  return {
+    success,
+    notepad,
+  };
+}
+
+export async function updateNotepadById(
+  id: number,
+  { title, subtitle, content }: Notepad
+) {
+  const pool = await getPool();
+  const notepad = await pool.one(sql`
+   UPDATE notepads 
+   SET title=${title}, subtitle=${subtitle}, content=${content}
+   WHERE id =${id}
+   returning *
+  `);
+
+  return {
     success: true,
-    data: {
-      notepad,
-    },
+    notepad,
   };
-  return response;
 }
 
-export function updateNotepadById(id: number, notepadData: Notepad) {
-  json.updateJSON([notepadModelDataPath, `${id}.json`], notepadData);
-  const notepad = json.readJSON(notepadModelDataPath, `${id}.json`);
+export async function createNotepad(
+  notepadData: Omit<Notepad, "id" | "created_at">
+) {
+  const validation = await createNotepadSchema.safeParseAsync(notepadData);
+  if (validation.success === false) {
+    return {
+      success: false,
+      notepad: null,
+      errors: validation.error.errors,
+    };
+  }
 
-  const response = {
+  const { title, subtitle, content } = validation.data;
+  const pool = await getPool();
+  const notepad: Notepad = await pool.one(sql`
+    INSERT INTO notepads (title, subtitle, content)
+    values (${title}, ${subtitle}, ${content})
+    returning *
+  `);
+
+  return {
     success: true,
-    data: { notepad },
+    notepad,
+    errors: [],
   };
-
-  return response;
-}
-
-export function createNotepad(notepadData: Notepad) {
-  const notepadsLatestId = json.readJSON(
-    notepadModelPath,
-    "notepadsLatestId.json"
-  );
-  const latestId: number = parseInt(notepadsLatestId as string);
-  const notepadId: number = latestId + 1;
-  json.updateJSON([notepadModelPath, "notepadsLatestId.json"], {
-    latestId: notepadId.toString(),
-  });
-
-  const notepad = {
-    ...notepadData,
-    id: notepadId,
-  };
-  json.createJSON([notepadModelDataPath, `${notepadId}.json`], notepad);
-
-  const response = {
-    success: true,
-    data: { notepad },
-  };
-
-  return response;
 }
 
 export function overwriteNotepadById(id: number, notepadData: Notepad) {

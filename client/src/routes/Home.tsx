@@ -1,8 +1,12 @@
 import { Search } from "../components/Search";
 import { NotesList } from "../components/NotesList";
+import { PaginationButtons } from "../components/PaginationButtons";
 import { useState, useEffect } from "react";
-import { api } from "../api";
+import { getNotepads, GetNotepadsOutput } from "../api/getNotepads";
 import { nanoid } from "nanoid";
+import { config } from "../config";
+
+const pageSize = config.pageSize;
 
 interface Note {
   id: string;
@@ -10,25 +14,45 @@ interface Note {
   subtitle: string;
   content: string;
   created_at: string;
+  count: number;
 }
 
-async function getNotepads() {
-  const res = await api.get("/notepads");
-  const notepads = res.data;
-  return notepads;
+interface Notepad {
+  count: number;
+  notepads: Note[];
 }
 
-const initialNotepads: Note[] = [];
+const initialNotepadList: Notepad = {
+  count: 0,
+  notepads: [],
+};
 
 const Home = () => {
-  const [notes, setNotes] = useState<Note[]>(initialNotepads);
+  const [notes, setNotes] = useState<Notepad>(initialNotepadList);
   const [isLoading, setIsLoading] = useState(true);
   const loadingText = isLoading ? "Loading..." : "";
+  const pageCount = Math.ceil(notes.count / pageSize);
 
   useEffect(() => {
     setIsLoading(true);
-    getNotepads().then((notes) => {
-      setNotes(notes);
+    getNotepads().then((response: GetNotepadsOutput) => {
+      const { notepads } = response;
+      console.log(response);
+      const convertedNotes: Note[] = Array.isArray(notepads)
+        ? notepads.map((notepad) => ({
+            id: notepad.id?.toString() ?? nanoid(),
+            title: notepad.title,
+            subtitle: notepad.subtitle,
+            content: notepad.content,
+            created_at: notepad.created_at,
+            count: notepads.length,
+          }))
+        : [];
+      setNotes((prevState) => ({
+        ...prevState,
+        count: convertedNotes.length,
+        notepads: convertedNotes,
+      }));
       setIsLoading(false);
     });
   }, []);
@@ -37,21 +61,30 @@ const Home = () => {
 
   const AddNote = (text: string) => {
     const date = new Date();
-    const newNote = {
+    const newNote: Note = {
       id: nanoid(),
       title: text,
       subtitle: text,
       content: text,
       created_at: date.toLocaleDateString(),
+      count: notes.count + 1,
     };
 
-    const newNotes = [...notes, newNote];
+    const newNotes = {
+      ...notes,
+      count: notes.count + 1,
+      notepads: [...notes.notepads, newNote],
+    };
     setNotes(newNotes);
   };
 
   const deleteNote = (id: string) => {
-    const newNotes = notes.filter((note) => note.id !== id);
-    setNotes(newNotes);
+    const newNotes = notes.notepads.filter((note) => note.id !== id);
+    setNotes((prevState) => ({
+      ...prevState,
+      count: prevState.count - 1,
+      notepads: newNotes,
+    }));
   };
 
   return (
@@ -59,7 +92,7 @@ const Home = () => {
       <div>{loadingText}</div>
       <Search handleSearchNote={setSearchText} />
       <NotesList
-        notes={notes.filter(
+        notes={notes.notepads.filter(
           (note) =>
             (note.content &&
               note.content.toLowerCase().includes(searchText.toLowerCase())) ||
@@ -70,6 +103,10 @@ const Home = () => {
         )}
         handleAddNote={AddNote}
         handleDeleteNote={deleteNote}
+      />
+      <PaginationButtons
+        pageCount={pageCount}
+        getLink={(page) => `/notepads/page/${page}`}
       />
     </div>
   );

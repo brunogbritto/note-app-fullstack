@@ -1,9 +1,8 @@
-PUT http://localhost:8080/notepads/1
+PUT http://localhost:8080/notepads/8
 Content-Type: application/json
 
 {
     "title": "ALTERADO",
     "subtitle": "ALTERADO",
-    "content":  "ALTERADO",
-    "created_at": "99/99/9999"
+    "content":  "ALTERADO"
 }

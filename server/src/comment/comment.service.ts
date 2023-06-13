@@ -1,5 +1,5 @@
 import path from "path";
-import { Comment } from "./commentTypes";
+import { Comment } from "../../../shared/types";
 
 import * as json from "../json";
 

@@ -5,16 +5,16 @@ export const notepadController = express.Router();
 
 //lista de notepads
 notepadController.get("/", (req, res) => {
-  const limit = Number(req.query.limit ?? 10);
-  const offset = Number(req.query.offset ?? 0);
-  const notepads = notepadService.findNotepads().slice(offset, offset + limit);
+  const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  const offset = req.query.offset ? Number(req.query.offset) : undefined;
+  const notepads = notepadService.findNotepads({ limit, offset });
   res.status(200).json(notepads);
 });
 
 //pega notepad pelo ID
-notepadController.get("/:id", (req, res) => {
+notepadController.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const notepad = notepadService.findNotepadById(id);
+  const notepad = await notepadService.findNotepadById(id);
   if (notepad === null) {
     res.sendStatus(404);
   } else {
@@ -22,29 +22,35 @@ notepadController.get("/:id", (req, res) => {
   }
 });
 
-//criar uma notepad
-notepadController.post("/", (req, res) => {
-  const response = notepadService.createNotepad(req.body);
-  res.json(response);
+//cria um notepad
+notepadController.post("/", async (req, res) => {
+  await delay(5);
+  const response = await notepadService.createNotepad(req.body);
+  const status = response.success ? 201 : 422;
+  res.status(status).json(response);
 });
 
-//sobrescrever uma notepad
-notepadController.put("/:id", (req, res) => {
+function delay(s: number) {
+  return new Promise((resolve) => setTimeout(resolve, s * 1000));
+}
+
+//sobrescrever um notepad
+notepadController.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const response = notepadService.overwriteNotepadById(id, req.body);
+  const response = await notepadService.updateNotepadById(id, req.body);
   res.json(response);
 });
 
-//atualizar parcialmente uma notepad
-notepadController.patch("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const response = notepadService.updateNotepadById(id, req.body);
-  res.json(response);
-});
-
-//deletar uma notepad pelo id
-notepadController.delete("/:id", (req, res) => {
+//deletar um notepad pelo id
+notepadController.delete("/:id", async (req, res) => {
   const id = Number(req.params.id);
   const response = notepadService.deleteNotepadById(id);
   res.json(response);
+});
+
+//Lista de comentários do notepad
+notepadController.get("/:id/comments", async (req, res) => {
+  const id = Number(req.params.id);
+  const response = await notepadService.findNotepadCommentsById(id);
+  res.status(200).json(response);
 });

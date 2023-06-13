@@ -1,1 +1,1 @@
-GET http://localhost:8080/notepads
+GET http://localhost:8080/notepads/9

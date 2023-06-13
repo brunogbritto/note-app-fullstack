@@ -4,7 +4,7 @@ import { Breadcrumbs } from "../components/Breadcrumbs";
 import toast from "react-simple-toasts";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api } from "../api";
+import { api } from "../api/api";
 
 const initialCreateNote = {
   title: "",
